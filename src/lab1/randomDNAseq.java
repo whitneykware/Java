@@ -29,3 +29,6 @@ public class randomDNAseq
 	}
 
 }
+
+//expected frequency of AAA by chance: 0.0156 or 16/1000
+//java's number is close to expected

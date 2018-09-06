@@ -2,7 +2,7 @@ package lab1;
 
 import java.util.Random;
 
-public class randomDNAseq 
+public class RandomDNAseq 
 {
 
 	public static void main(String[] args) 

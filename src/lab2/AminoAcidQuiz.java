@@ -25,6 +25,7 @@ public class AminoAcidQuiz
 	{	
 		Random rnd = new Random();
 		
+		System.out.println("Number of rounds: ");
 		String s = System.console().readLine();
 		int questions = Integer.parseInt(s);
 		

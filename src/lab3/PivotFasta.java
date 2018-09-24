@@ -46,7 +46,7 @@ public class PivotFasta
                 	seq.append(line);
                 }
             }
-        //adds last sequence
+        //adds last sequence from string builder
     	sequences.add(seq.toString());
     	seq.delete(0, seq.length());
     	
@@ -56,6 +56,6 @@ public class PivotFasta
 			getCount(sequences.get(x), "C") + "\t" + getCount(sequences.get(x), "G") + "\t" + 
 			getCount(sequences.get(x), "T") + "\t" + sequences.get(x) + "\n");
 		
-		fasta.close(); out.close();
+		fasta.close(); out.flush(); out.close();
     }
 }

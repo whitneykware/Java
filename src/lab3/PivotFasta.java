@@ -10,7 +10,7 @@ public class PivotFasta
 	
 	public static int getCount(String s, CharSequence c) 
 	{
-		int count = s.length() - s.replace(c, "").length();
+		int count = s.toUpperCase().length() - s.toUpperCase().replace(c, "").length();
 		return count;
 	}
  

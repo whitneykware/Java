@@ -46,7 +46,6 @@ public class PivotFasta
                 	seq.append(line);
                 }
             }
-        //adds last sequence from string builder
     	sequences.add(seq.toString());
     	seq.delete(0, seq.length());
     	

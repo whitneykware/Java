@@ -1,10 +1,21 @@
 package lab4;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 public class FastaSequence
 {
@@ -43,6 +54,7 @@ public class FastaSequence
 		return (float) (GC / seqLen);
 	}
 	
+
 	//static factory method that returns list of FastaSequence objects
 	public static List<FastaSequence> readFastaFile(String filepath) throws Exception
 	{	
@@ -90,7 +102,32 @@ public class FastaSequence
     	
 	}
  
-
+	public static void writeUnique(String inFile) throws Exception
+	{
+		List<FastaSequence> fastaList = FastaSequence.readFastaFile(inFile);		
+        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(outFile)));
+        
+        List<String> allSeqs = new ArrayList<String>();
+        
+		for( FastaSequence fs : fastaList)
+		{
+			allSeqs.add(fs.getSequence().toUpperCase());
+		}
+		
+		Set<String> uniqueSeqs = new HashSet<String>(allSeqs);
+		Map<String, Integer> countMap = new HashMap<String, Integer>();
+		
+		for( String u : uniqueSeqs)
+		{
+			int count = Collections.frequency(allSeqs, u);
+			countMap.put(u, count);
+		}
+		
+		System.out.println(countMap);
+		System.out.println(allSeqs);
+		System.out.println(uniqueSeqs);
+		
+	}
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -103,7 +140,7 @@ public class FastaSequence
 			System.out.println(fs.getGCRatio());
 			System.out.println();
 		}
-
+		FastaSequence.writeUnique("/Users/whitneyware/test.fasta");
 
 	}
 

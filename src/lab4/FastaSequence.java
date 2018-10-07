@@ -5,13 +5,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,15 +102,35 @@ public class FastaSequence
  
 	public static void writeUnique(String inFile) throws Exception
 	{
-		List<FastaSequence> fastaList = FastaSequence.readFastaFile(inFile);		
-        //BufferedWriter out = new BufferedWriter(new FileWriter(new File(outFile)));
+        BufferedReader fasta = new BufferedReader(new FileReader(new File(inFile)));
+        BufferedWriter out = new BufferedWriter(new FileWriter(new File("fasta_unique_seqs.txt")));
         
-        List<String> allSeqs = new ArrayList<String>();
+        // create sequence list only 
+		List<String> allSeqs = new ArrayList<String>();
+		StringBuilder seq = new StringBuilder();
+		boolean id = true;
         
-		for( FastaSequence fs : fastaList)
-		{
-			allSeqs.add(fs.getSequence().toUpperCase());
-		}
+            for(String line = fasta.readLine().trim(); line != null; line = fasta.readLine())
+            {
+                if (line.charAt(0) == '>') 
+                {
+                    if (id)
+                    {
+                        id = false;
+                    }
+                    else
+                    {
+                    	allSeqs.add(seq.toString());
+                    	seq.delete(0, seq.length());
+                    }
+                } 
+                else 
+                {
+                	seq.append(line);
+                }
+            }
+            allSeqs.add(seq.toString());
+            seq.delete(0, seq.length());
 		
 		Set<String> uniqueSeqs = new HashSet<String>(allSeqs);
 		Map<String, Integer> countMap = new HashMap<String, Integer>();
@@ -123,10 +141,19 @@ public class FastaSequence
 			countMap.put(u, count);
 		}
 		
-		System.out.println(countMap);
-		System.out.println(allSeqs);
-		System.out.println(uniqueSeqs);
+		countMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+			.forEach(e -> {
+				try
+				{
+					out.write(">" + e.getValue() + "\n" + e.getKey() + "\n");
+				} 
+				catch (IOException e1)
+				{
+					e1.printStackTrace();
+				}
+			});;
 		
+		fasta.close(); out.flush(); out.close();
 	}
 	
 	public static void main(String[] args) throws Exception

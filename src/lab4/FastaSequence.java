@@ -40,7 +40,7 @@ public class FastaSequence
 	{
 		String dnaSeq = this.sequence.toUpperCase();
 		int seqLen = dnaSeq.length();
-		double GC = 0;
+		float GC = 0;
 		
 		for(int i = 0; i < seqLen; i++)
 		{
@@ -146,7 +146,7 @@ public class FastaSequence
 			System.out.println(fs.getGCRatio());
 			System.out.println();
 		}
-		FastaSequence.writeUnique("/Users/whitneyware/test.fasta", "fasta_unique_out.txt");
+		FastaSequence.writeUnique("/Users/whitneyware/test.fasta", "/Users/whitneyware/fasta_unique_out.txt");
 
 	}
 

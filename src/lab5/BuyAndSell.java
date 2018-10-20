@@ -5,7 +5,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,46 +16,66 @@ import javax.swing.JTextField;
 
 public class BuyAndSell extends JFrame
 {
-
 	private static final long serialVersionUID = 9038175598464893714L;
 	
-	private List<String> inventory = new ArrayList<String>();
-	private int money = 1000;
+	private Map<String, Integer> inventory = new HashMap<String, Integer>();
+	private long money = 1000;
 	
 	private JTextField textField = new JTextField(); 
-	private JButton buyMain = new JButton("Purchase Itrms");
-	private JButton sellMain = new JButton("Sell Items");
-	private JButton buy = new JButton("Buy");
-	private JButton sell = new JButton("Sell");
-	private JButton yes = new JButton("Yes");
-	private JButton back = new JButton("Back");
-	
-	// buy menu
-	// sell menu 
+
 	
 	private void mainMenu()
 	{
+		getContentPane().removeAll();
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(mainBottomPanel(), BorderLayout.SOUTH);
 		getContentPane().add(textField, BorderLayout.CENTER);
 		textField.setText("What can I do for you today?");
-
+		revalidate();
+		repaint();
 	}
+	
 	private void buyMainMenu()
 	{
+		getContentPane().removeAll();
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(buyBottomPanel(), BorderLayout.SOUTH);
+		getContentPane().add(textField, BorderLayout.CENTER);
 		textField.setText("What items would you like to purchase?");
-		
+		revalidate();
+		repaint();
 	}
 	
 	private void sellMainMenu()
 	{
-		textField.setText("What would be like to sell?");
+		getContentPane().removeAll();
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(sellBottomPanel(), BorderLayout.SOUTH);
+		getContentPane().add(textField, BorderLayout.CENTER);
+		textField.setText("What items would you like to sell?");
+		revalidate();
+		repaint();
+	}
+	
+	private JButton returnToMain()
+	{
+		JButton main = new JButton("Back to Main");
+		main.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				mainMenu();
+			}
+		});
+		return main;
 	}
 	
 	private JPanel mainBottomPanel()
 	{
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridLayout(0,2));
+		JButton buyMain = new JButton("Purchase Items");
+		JButton sellMain = new JButton("Sell Items");
 		mainPanel.add(buyMain);
 		mainPanel.add(sellMain);
 		
@@ -80,18 +102,55 @@ public class BuyAndSell extends JFrame
 	{
 		JPanel buy = new JPanel();
 		buy.setLayout(new GridLayout(0,2));
+		JButton buyButton = new JButton("Buy");
+		buy.add(buyButton);
+		buy.add(returnToMain());
+		
+		buyButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				mainMenu();
+			}
+		});
+		return buy;
 	}
+
+	private JPanel sellBottomPanel()
+	{
+		JPanel sell = new JPanel();
+		JButton sellButton = new JButton("Sell");
+		sell.setLayout(new GridLayout(0,2));
+		sell.add(sellButton);
+		sell.add(returnToMain());
+
+		sellButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				buyMainMenu();
+			}
+		});
+		return sell;
+	}
+	
+	//private int purchase()
+
 	
 	
 	public BuyAndSell()
 	{
 		super("Belethor's General Goods");
-
+		setLocationRelativeTo(null);
+		setSize(400,400);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainMenu();
+		setVisible(true);
 	}
 	
 	public static void main(String[] args)
 	{	
-		// implement gui
+		new BuyAndSell();
 	}
 
 }

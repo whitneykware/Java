@@ -28,7 +28,7 @@ public class Merchant extends JFrame
 {
 	private static final long serialVersionUID = 9038175598464893714L;
 	
-	private int money;
+	private long money;
 	private List<String> inventory = new ArrayList<String>();
 	private JTextField textField = new JTextField(); 
 	
@@ -51,22 +51,22 @@ public class Merchant extends JFrame
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(buyBottomPanel(), BorderLayout.SOUTH);
 		getContentPane().add(textField, BorderLayout.CENTER);
-		textField.setText("What items would you like to purchase?");
+		textField.setText("What item would you like to purchase?");
 		textField.setEditable(false);
 		setJMenuBar(getBuyMenuBar());
 		revalidate();
 		repaint();
 	}
 	
-	// panel of items
+	// button panel of items
 	private JPanel buyBottomPanel()
 	{
 		JPanel buy = new JPanel();
 		buy.setLayout(new GridLayout(items.size()/2, items.size()));
 		
-		for ( String key : items.keySet())
+		for (String key : items.keySet())
 		{
-			JButton it = new JButton(key + ", " + items.get(key));
+			JButton it = new JButton(key + ", price: " + items.get(key));
 			buy.add(it);
 			it.addActionListener(new ActionListener()
 			{
@@ -78,7 +78,7 @@ public class Merchant extends JFrame
 						getContentPane().setLayout(new BorderLayout());
 						getContentPane().add(backBottomPanel(), BorderLayout.SOUTH);
 						getContentPane().add(textField, BorderLayout.CENTER);
-						textField.setText("Sorry, you do not have enough money for this item.");
+						textField.setText("You do not have enough money to purchase this item.");
 						textField.setEditable(false);
 						setJMenuBar(getBuyMenuBar());
 						revalidate();
@@ -87,8 +87,8 @@ public class Merchant extends JFrame
 					else
 					{
 					money = money - items.get(key);
-					inventory.add(key);
 					updateMoney();
+					inventory.add(key);
 					}
 				}
 			});
@@ -96,7 +96,7 @@ public class Merchant extends JFrame
 		return buy;
 	}
 	
-	// returns to main screen
+	// return to main screen
 	private JPanel backBottomPanel()
 	{
 		JPanel back = new JPanel();
@@ -112,15 +112,8 @@ public class Merchant extends JFrame
 		});
 		return back;
 	}
-
-	private void updateMoney()
-	{
-		textField.setText(String.format("Money remaining: %d, ", this.money) + '\n' + 
-				"Would you like to buy anything else?");
-		validate();
-	}
 	
-	// menus
+	// menu bar
 	private JMenuBar getBuyMenuBar()
 	{
 		JMenuBar buyMenuBar = new JMenuBar();
@@ -162,6 +155,14 @@ public class Merchant extends JFrame
 		return buyMenuBar;
 	}
 	
+	// show money remaining
+	private void updateMoney()
+	{
+		textField.setText(String.format("Money remaining: %d. ", this.money) + '\n' + 
+				"Would you like to buy anything else?");
+		validate();
+	}
+	
 	// save to file
 	private void saveToFile()
 	{
@@ -196,9 +197,9 @@ public class Merchant extends JFrame
 		}
 	}
 	
-	public Merchant(int money)
+	public Merchant(long money)
 	{
-		super("Belethor's General Goods");
+		super("General Goods Merchant");
 		this.money = money;
 		setLocationRelativeTo(null);
 		setSize(400,400);
@@ -209,7 +210,7 @@ public class Merchant extends JFrame
 	
 	public static void main(String[] args)
 	{	
-		int money = 100;
+		long money = 100;
 		new Merchant(money);
 	}
 

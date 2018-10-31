@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -52,12 +53,12 @@ public class AminoAcidQuizGUI extends JFrame
 	// main screen 
 	private void quizStart()
 	{
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(buttonPanel(), BorderLayout.NORTH);
-		getContentPane().add(timeField, BorderLayout.EAST);
-		getContentPane().add(textField, BorderLayout.CENTER);
-		getContentPane().add(resultsField, BorderLayout.WEST);
-		getContentPane().add(inputPanel(), BorderLayout.SOUTH);
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		getContentPane().add(buttonPanel());
+		getContentPane().add(timeField);
+		getContentPane().add(resultsField);
+		getContentPane().add(textField);
+		getContentPane().add(inputPanel());
 		textField.setEditable(false);
 		timeField.setEditable(false);
 		resultsField.setEditable(false);
@@ -193,7 +194,7 @@ public class AminoAcidQuizGUI extends JFrame
 	{
 		super("Amino Acid Quiz");
 		setLocationRelativeTo(null);
-		setSize(600,400);
+		setSize(600,200);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		quizStart();
 		setVisible(true);

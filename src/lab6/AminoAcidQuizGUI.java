@@ -38,7 +38,7 @@ public class AminoAcidQuizGUI extends JFrame
 	private int incorrect = 0;
 	private String aChar;
 	Random rnd = new Random();
-	private boolean newAnswer;
+	private boolean newAnswer = false;
 	
 	private JTextArea textField = new JTextArea(); 
 	private JTextArea resultsField = new JTextArea();
@@ -82,7 +82,7 @@ public class AminoAcidQuizGUI extends JFrame
 				startButton.setEnabled(false);
 				cancelButton.setEnabled(true);
 				quiz();
-				// timer in different thread
+				
 			}
 		});
 		
@@ -124,6 +124,7 @@ public class AminoAcidQuizGUI extends JFrame
 	// quiz
 	private void quiz()
 	{		
+		new Thread ( new QuizTimer()).start();
 		while (cancel == false)
 		{
 			int a = rnd.nextInt(20);

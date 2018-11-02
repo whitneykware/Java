@@ -3,6 +3,7 @@ package lab6;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Random;
 import javax.swing.Timer;
 
@@ -14,8 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-
-import lab6.timerThread.CountdownListener;
 
 public class AminoAcidQuizGUI extends JFrame
 {
@@ -40,14 +39,14 @@ public class AminoAcidQuizGUI extends JFrame
 	private static int incorrect = 0;
 	Random rnd = new Random();
 	
-	private static JTextArea textField = new JTextArea(); 
-	private static JTextArea resultsField = new JTextArea();
-	private static JTextArea timeField = new JTextArea();
+	private JTextArea textField = new JTextArea(); 
+	private JTextArea resultsField = new JTextArea();
+	private JTextArea timeField = new JTextArea();
 	
-	private static JButton startButton = new JButton("Start Quiz");
-	private static JButton cancelButton = new JButton("Cancel");
+	private static volatile JButton startButton = new JButton("Start Quiz");
+	private static volatile JButton cancelButton = new JButton("Cancel");
 
-	private static volatile boolean cancel;
+	static volatile boolean cancel;
 	static volatile Timer myTimer;
 
 	// main screen 
@@ -75,10 +74,9 @@ public class AminoAcidQuizGUI extends JFrame
 		buttons.add(startButton);
 		startButton.addActionListener(new ActionListener()
 		{
-			public void actionPerformed(ActionEvent e)
+			public synchronized void actionPerformed(ActionEvent e)
 			{
 				cancel = false;
-
 				
 				SwingUtilities.invokeLater( new Runnable() 
 				{
@@ -93,26 +91,31 @@ public class AminoAcidQuizGUI extends JFrame
 					int a = rnd.nextInt(20);
 					textField.setText((FULL_NAMES[a])); 
 				    String aChar = JOptionPane.showInputDialog(textField, "Enter the one-letter code.", 
-				    		"Amino Acid Quiz", JOptionPane.PLAIN_MESSAGE).toUpperCase();
+				    		"Amino Acid Quiz", JOptionPane.PLAIN_MESSAGE);
 				    
-				    if( aChar == null || (aChar  != null && ("".equals(aChar ))))   
+
+			    	if( aChar == null || (aChar  != null && ("".equals(aChar ))))   
+			    	{
+			    		cancel = true;
+			    	}
+				    
+				    if( ! cancel)
 				    {
-				        cancel = true;
-				    }
+				    	aChar = aChar.toUpperCase();
 				    
-					if (aChar.equals(SHORT_NAMES[a]))
-					{
-						textField.setText(("Correct!")); 
-						correct++;
-					}
-				
-					else
-					{
-						textField.setText(("Incorrect.")); 
-						incorrect++;
-					}
-					
-					resultsField.setText("Correct: " + correct + "\nIncorrect: " + incorrect);
+				    	if (aChar.equals(SHORT_NAMES[a]))
+				    	{
+				    		textField.setText(("Correct!")); 
+				    		correct++;
+				    	}
+				    	
+				    	else
+				    	{
+				    		textField.setText(("Incorrect.")); 
+				    		incorrect++;
+				    	}
+				    }
+				    	resultsField.setText("Correct: " + correct + "\nIncorrect: " + incorrect);
 				}
 				timeField.setText(" ");
 				textField.setText("Times up!");
@@ -126,6 +129,10 @@ public class AminoAcidQuizGUI extends JFrame
 			public void actionPerformed(ActionEvent e)
 			{
 				cancel = true;
+				myTimer.stop();
+				timeField.setText(" ");
+				textField.setText("Quiz ended.\n");
+				resultsField.setText("Final Score: \nCorrect: " + correct + "\nIncorrect: " + incorrect);
 			}
 		});
 		return buttons;
@@ -147,7 +154,7 @@ public class AminoAcidQuizGUI extends JFrame
 			secondsCount = startingSeconds; 
 		}	
 
-		public void actionPerformed(ActionEvent evt) 
+		public synchronized void actionPerformed(ActionEvent evt) 
 		{
 
 	    	 timeField.setText(Integer.toString(secondsCount));
@@ -158,13 +165,9 @@ public class AminoAcidQuizGUI extends JFrame
 	            myTimer.stop();
 		        cancel = true;
 	         }
-
-			
 	    }
 	 }
-	
-/////////////////////////////////////////////////////////////////////////////////   
-	
+		
 	public AminoAcidQuizGUI()
 	{
 		super("Amino Acid Quiz");

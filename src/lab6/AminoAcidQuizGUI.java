@@ -9,6 +9,7 @@ import javax.swing.Timer;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -37,19 +38,17 @@ public class AminoAcidQuizGUI extends JFrame
 	
 	private static int correct = 0;
 	private static int incorrect = 0;
-	private static String aChar;
 	Random rnd = new Random();
 	
 	private static JTextArea textField = new JTextArea(); 
 	private static JTextArea resultsField = new JTextArea();
 	private static JTextArea timeField = new JTextArea();
-	private static JTextField inputField = new JTextField(16); 
 	
 	private static JButton startButton = new JButton("Start Quiz");
 	private static JButton cancelButton = new JButton("Cancel");
 
-	private volatile boolean cancel;
-	static Timer myTimer;
+	private static volatile boolean cancel;
+	static volatile Timer myTimer;
 
 	// main screen 
 	private void quizStart()
@@ -59,11 +58,10 @@ public class AminoAcidQuizGUI extends JFrame
 		getContentPane().add(timeField);
 		getContentPane().add(resultsField);
 		getContentPane().add(textField);
-		getContentPane().add(inputPanel());
-		//textField.setEditable(false);
+		textField.setEditable(false);
 		timeField.setEditable(false);
-		//resultsField.setEditable(false);
-		textField.setText("Please enter the one letter code for each amino acid given. "
+		resultsField.setEditable(false);
+		textField.setText("Please enter the one-letter code for each amino acid given. "
 				+ "\nQuiz ends after 30 seconds.");
 		timeField.setText("Time Remaining: ");
 		resultsField.setText("Correct: \nIncorrect: " );
@@ -80,8 +78,7 @@ public class AminoAcidQuizGUI extends JFrame
 			public void actionPerformed(ActionEvent e)
 			{
 				cancel = false;
-				//startButton.setEnabled(true);
-				//cancelButton.setEnabled(false);
+
 				
 				SwingUtilities.invokeLater( new Runnable() 
 				{
@@ -95,7 +92,14 @@ public class AminoAcidQuizGUI extends JFrame
 				{
 					int a = rnd.nextInt(20);
 					textField.setText((FULL_NAMES[a])); 
-						
+				    String aChar = JOptionPane.showInputDialog(textField, "Enter the one-letter code.", 
+				    		"Amino Acid Quiz", JOptionPane.PLAIN_MESSAGE).toUpperCase();
+				    
+				    if( aChar == null || (aChar  != null && ("".equals(aChar ))))   
+				    {
+				        cancel = true;
+				    }
+				    
 					if (aChar.equals(SHORT_NAMES[a]))
 					{
 						textField.setText(("Correct!")); 
@@ -108,14 +112,11 @@ public class AminoAcidQuizGUI extends JFrame
 						incorrect++;
 					}
 					
-					resultsField.setText("Correct: " + correct + "\n" + "Incorrect: "
-							+ incorrect);
+					resultsField.setText("Correct: " + correct + "\nIncorrect: " + incorrect);
 				}
-				
+				timeField.setText(" ");
 				textField.setText("Times up!");
-				resultsField.setText("Final Score: Correct: " + correct + "\n" + "Incorrect: "
-						+ incorrect);
-				
+				resultsField.setText("Final Score: \nCorrect: " + correct + "\nIncorrect: " + incorrect);
 			}
 		});
 		
@@ -129,30 +130,7 @@ public class AminoAcidQuizGUI extends JFrame
 		});
 		return buttons;
 	}
-	
-	// user input, enter button
-	private JPanel inputPanel()
-	{
-		JPanel in = new JPanel();
-		in.add(inputField);
-	    JButton enter = new JButton("Enter"); 
-	    in.add(enter);
-	    enter.addActionListener(new ActionListener()
-	    {
-	    	public void actionPerformed(ActionEvent e) 
-	    	{ 
-	    		String s = e.getActionCommand(); 
-	    		if (s.equals("Enter")) 
-	    		{ 
-	    			String answer = inputField.getText().toUpperCase();
-	    			aChar = "" + answer.charAt(0);
-	    			inputField.setText("  "); 
-	    		}
-	    	}
-	    });
-	    return in;
-	}
-	
+
 	private void setupTimer(int numSecondsToCountDown) 
 	{
 	      timeField.setText("Time: " + Integer.toString(numSecondsToCountDown));
@@ -171,14 +149,17 @@ public class AminoAcidQuizGUI extends JFrame
 
 		public void actionPerformed(ActionEvent evt) 
 		{
+
 	    	 timeField.setText(Integer.toString(secondsCount));
 	         secondsCount--;
 
-	         if (secondsCount <= 0) 
+	         if (secondsCount <= 0 || cancel ) 
 	         { 
 	            myTimer.stop();
-	            cancel = true;
+		        cancel = true;
 	         }
+
+			
 	    }
 	 }
 	

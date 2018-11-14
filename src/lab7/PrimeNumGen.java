@@ -19,7 +19,7 @@ import javax.swing.SwingUtilities;
 
 public class PrimeNumGen extends JFrame
 {
-	
+	private static final long serialVersionUID = 6179840045609037911L;
 	private final JTextArea aTextField = new JTextArea();
 	private final JButton primeButton = new JButton("Start");
 	private final JButton cancelButton = new JButton("Cancel");
@@ -27,6 +27,7 @@ public class PrimeNumGen extends JFrame
 	private final PrimeNumGen thisFrame;
 	
 	private static long startTime;
+	private static Integer max;
 	private static final Map<Integer, Integer> map = new ConcurrentHashMap<Integer, Integer>();
 
 	
@@ -37,7 +38,6 @@ public class PrimeNumGen extends JFrame
 		// don't add the action listener from the constructor
 		png.addActionListeners();
 		png.setVisible(true);
-		
 	}
 	
 	private PrimeNumGen(String title)
@@ -73,7 +73,7 @@ public class PrimeNumGen extends JFrame
 				{
 					
 					String num = JOptionPane.showInputDialog("Enter a large integer");
-					Integer max =null;
+					max =null;
 					
 					try
 					{
@@ -86,7 +86,9 @@ public class PrimeNumGen extends JFrame
 						ex.printStackTrace();
 					}
 					
-					Semaphore s = new Semaphore(4);
+					final int numThreads = Runtime.getRuntime().availableProcessors();
+					Semaphore s = new Semaphore(numThreads);
+					
 					if( max != null)
 					{
 						aTextField.setText("");
@@ -95,20 +97,28 @@ public class PrimeNumGen extends JFrame
 						cancel = false;
 						
 						startTime = System.currentTimeMillis();
-						
-						for (int x = 0; x < max; x++)
+						for (int x = 1; x < max && ! cancel; x++)
 						{
-							new Thread(new UserInput(x,s)).start();
+							try
+							{
+								s.acquire();
+								UserInput in = new UserInput(x, s);
+								new Thread(in).start();
+							} catch (InterruptedException e1)
+							{
+								e1.printStackTrace();
+							}
+
 						}
-					
-					
-						for (int x = 0; x < 4; x++)
+
+						for (int x = 0; x < numThreads; x++)
 						{
 							try
 							{
 								s.acquire();
 							} catch (InterruptedException e1)
 							{
+								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						}
@@ -173,16 +183,12 @@ public class PrimeNumGen extends JFrame
 		{
 			try
 			{
-				semaphore.acquire();	
+				//semaphore.acquire();	
 				long lastUpdate = System.currentTimeMillis();
-				//List<Integer> list = new ArrayList<Integer>();
 				
 					if( isPrime(num))
 					{
-						synchronized(this)
-						{
-							map.put(num,num);
-						}
+						map.put(num,num);
 					}
 					
 					if( System.currentTimeMillis() - lastUpdate > 500)

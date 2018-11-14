@@ -19,8 +19,6 @@ import javax.swing.SwingUtilities;
 
 public class PrimeNumGen extends JFrame
 {
-
-	private static final long serialVersionUID = 2132398106002426717L;
 	
 	private final JTextArea aTextField = new JTextArea();
 	private final JButton primeButton = new JButton("Start");
@@ -28,10 +26,9 @@ public class PrimeNumGen extends JFrame
 	private volatile boolean cancel = false;
 	private final PrimeNumGen thisFrame;
 	
-	private static final Map<Integer, Integer> map = new ConcurrentHashMap<Integer, Integer>();
-	private static final int numThreads = Runtime.getRuntime().availableProcessors(); 
-	private static int max;
 	private static long startTime;
+	private static final Map<Integer, Integer> map = new ConcurrentHashMap<Integer, Integer>();
+
 	
 	public static void main(String[] args)
 	{
@@ -40,6 +37,7 @@ public class PrimeNumGen extends JFrame
 		// don't add the action listener from the constructor
 		png.addActionListeners();
 		png.setVisible(true);
+		
 	}
 	
 	private PrimeNumGen(String title)
@@ -70,130 +68,140 @@ public class PrimeNumGen extends JFrame
 	{
 		cancelButton.addActionListener(new CancelOption());
 	
-		primeButton.addActionListener(new ActionListener() 
-		{
-			public void actionPerformed(ActionEvent e)
-			{	
-				String num = JOptionPane.showInputDialog("Enter a large integer");
-				Integer max =null;
-					
-				try
+		primeButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e)
 				{
-					max = Integer.parseInt(num);
-				}
-				catch(Exception ex)
-				{
-					JOptionPane.showMessageDialog(
-							thisFrame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-					ex.printStackTrace();
-				}
 					
-				if( max != null)
-				{
-					aTextField.setText("");
-					primeButton.setEnabled(false);
-					cancelButton.setEnabled(true);
-					cancel = false;
-						
-					Semaphore s = new Semaphore(numThreads);
+					String num = JOptionPane.showInputDialog("Enter a large integer");
+					Integer max =null;
 					
-					startTime = System.currentTimeMillis();
-						
-					for (int x=0; x < max && ! cancel; x++)
+					try
 					{
-						UserInput in = new UserInput(x,s);
-						new Thread(in).start(); //starts new thread that does prime
+						max = Integer.parseInt(num);
 					}
-						
-					for (int x = 0; x < numThreads; x++)
+					catch(Exception ex)
 					{
-						try
+						JOptionPane.showMessageDialog(
+								thisFrame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+						ex.printStackTrace();
+					}
+					
+					Semaphore s = new Semaphore(4);
+					if( max != null)
+					{
+						aTextField.setText("");
+						primeButton.setEnabled(false);
+						cancelButton.setEnabled(true);
+						cancel = false;
+						
+						startTime = System.currentTimeMillis();
+						
+						for (int x = 0; x < max; x++)
 						{
-							s.acquire();
-						} 
-						catch (InterruptedException e1)
-						{
-							e1.printStackTrace();
+							new Thread(new UserInput(x,s)).start();
 						}
-					}
 					
-					final StringBuffer buff = new StringBuffer();
 					
-					List<Integer> orderedNums = new ArrayList<Integer>(map.values());
-					Collections.sort(orderedNums);
-					
-					for( Integer n : orderedNums)
-					{
-						buff.append(n + "\n");
-					}
-					
-					if( cancel)
-					{
-						buff.append("cancelled\n");
-					}
-					
-					float time = (System.currentTimeMillis() - startTime )/1000f;
-					buff.append("Time = " + time + " seconds " );
-					
-					SwingUtilities.invokeLater( new Runnable()
-					{
-						@Override
-						public void run()
+						for (int x = 0; x < 4; x++)
 						{
-							cancel = false;
-							primeButton.setEnabled(true);
-							cancelButton.setEnabled(false);
-							aTextField.setText( (cancel ? "cancelled " : "") +  buff.toString());
+							try
+							{
+								s.acquire();
+							} catch (InterruptedException e1)
+							{
+								e1.printStackTrace();
+							}
 						}
-					});
-				} // end if max not null
-			}}); // end of action listener for prime
-	} // end action listener
+					
+						finalUpdate();
+					}
+				}});
+		}
 	
-
+	private void finalUpdate()
+	{
+		final StringBuffer buff = new StringBuffer();
+		List<Integer> orderedNums = new ArrayList<Integer>(map.keySet());
+		Collections.sort(orderedNums);
+		
+		for( Integer n : orderedNums)
+		{
+			buff.append(n + "\n");
+		}
+		
+		if( cancel)
+			buff.append("cancelled\n");
+		
+		float time = (System.currentTimeMillis() - startTime )/1000f;
+		buff.append("Time = " + time + " seconds " );
+		
+		SwingUtilities.invokeLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{	
+				cancel = false;
+				primeButton.setEnabled(true);
+				cancelButton.setEnabled(false);
+				aTextField.setText( (cancel ? "cancelled " : "") +  buff.toString());
+			}
+		});
+		
+	}
+	
+	private boolean isPrime( int i)
+	{
+		for( int x=2; x < i -1; x++)
+			if( i % x == 0  )
+				return false;
+		
+		return true;
+	}
+	
 	private class UserInput implements Runnable
 	{
-		private final int number;
+		private final int num;
 		private final Semaphore semaphore;
 		
-		private UserInput(int number, Semaphore semaphore)
+		private UserInput(int num, Semaphore semaphore)
 		{
-			this.number = number;
 			this.semaphore = semaphore;
+			this.num = num;
 		}
 		
 		public void run()
 		{
 			try
 			{
-				semaphore.acquire();
+				semaphore.acquire();	
 				long lastUpdate = System.currentTimeMillis();
-			
-				while (! cancel) 
-				{	
-					if( isPrime(number))
+				//List<Integer> list = new ArrayList<Integer>();
+				
+					if( isPrime(num))
 					{
-						map.put(number, number);
-						
-						if( System.currentTimeMillis() - lastUpdate > 500)
+						synchronized(this)
 						{
-							float time = (System.currentTimeMillis() -startTime )/1000f;
-							final String outString= "Found " + map.size() + " in " + number + " of " + max + " " 
-										+ time + " seconds ";
-						
-							SwingUtilities.invokeLater( new Runnable()
-							{
-								@Override
-								public void run()
-								{
-										aTextField.setText(outString);
-								}
-							});
-						
-							lastUpdate = System.currentTimeMillis();	
+							map.put(num,num);
 						}
 					}
-				} // list is compete
+					
+					if( System.currentTimeMillis() - lastUpdate > 500)
+					{
+						float time = (System.currentTimeMillis() -startTime )/1000f;
+						final String outString= "Found " + map.size() + " in " + num + " of " + max + " " 
+									+ time + " seconds ";
+						
+						SwingUtilities.invokeLater( new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								aTextField.setText(outString);
+							}
+						});
+						
+						lastUpdate = System.currentTimeMillis();	
+					}
 			}
 			catch(Exception ex)
 			{
@@ -202,17 +210,10 @@ public class PrimeNumGen extends JFrame
 			finally
 			{
 				semaphore.release();
-			}		
-		} // end run
-		
-		private boolean isPrime( int i)
-		{
-			for( int x=2; x < i -1; x++)
-				if( i % x == 0  )
-					return false;
-			
-			return true;
-		}
+			}
+		}// end run
 		
 	}  // end UserInput
 }
+	
+	

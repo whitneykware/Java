@@ -24,8 +24,8 @@ public class PrimeNumGen extends JFrame
 	private volatile boolean cancel = false;
 	private final PrimeNumGen thisFrame;
 	
-	private static final int numThreads = Runtime.getRuntime().availableProcessors();
 	private static long startTime;
+	private static final int numThreads = Runtime.getRuntime().availableProcessors();
 	private static List<Integer> primes = Collections.synchronizedList(new ArrayList<Integer>());
 
 	
@@ -91,11 +91,11 @@ public class PrimeNumGen extends JFrame
 						cancelButton.setEnabled(true);
 						cancel = false;
 						new Thread(new StartThreads(max)).start();
-
 					}
 				}});
 		}
 	
+	// starts threads (determined by # of available processors), acquires all permits then updates final results
 	private class StartThreads implements Runnable
 	{
 		private final int max;
@@ -138,7 +138,7 @@ public class PrimeNumGen extends JFrame
 		}
 	}
 	
-	
+	// finds prime numbers, adds to list, releases semaphore 
 	private class FindPrimeNumbers implements Runnable
 	{
 		private final int start;
@@ -192,6 +192,7 @@ public class PrimeNumGen extends JFrame
 		return true;
 	}
 	
+	// sorts finished list and displays results and time
 	private void finalUpdate()
 	{
 		final StringBuffer buff = new StringBuffer();
@@ -205,8 +206,10 @@ public class PrimeNumGen extends JFrame
 			}
 		}
 		
-		if( cancel)
+		if (cancel)
+		{
 			buff.append("cancelled\n");
+		}
 		
 		float time = (System.currentTimeMillis() - startTime )/1000f;
 		buff.append("Time = " + time + " seconds " );

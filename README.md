@@ -8,3 +8,13 @@ The goals accomplished in this course were:
 - Designing software that avoids common problems in multi-core programming including data corruption, thread
 starvation and deadlock.
 - Applying these implementations to the large datasets of post-genomic biology.
+
+
+Lab 1:
+Lab 2:
+Lab 3:
+Lab 4:
+Lab 5: 
+Lab 6:
+Lab 7:
+ 
